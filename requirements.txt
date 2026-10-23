@@ -1,0 +1,2 @@
+# No third-party Python packages are needed on Python 3.13 or 3.14.
+# Tkinter is required only for the desktop simulator (an OS/Python component).

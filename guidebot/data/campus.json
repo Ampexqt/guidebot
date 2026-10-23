@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "campus_name": "Sample Campus — PLACEHOLDER",
+  "is_placeholder": true,
+  "starting_point": "GuideBot kiosk (fictional starting point)",
+  "notice": "DEMO DATA ONLY. These fictional routes are placeholders, not real campus directions.",
+  "destinations": [
+    {
+      "id": "library",
+      "name": "Library",
+      "category": "Learning",
+      "aliases": ["books", "reading", "study"],
+      "description": "Placeholder location for books, reading, and study spaces.",
+      "steps": [
+        "From the fictional GuideBot kiosk, follow the sample main corridor straight ahead.",
+        "Turn left at the placeholder sign marked Learning Wing.",
+        "Continue to the fictional Library entrance on your right."
+      ]
+    },
+    {
+      "id": "registrar",
+      "name": "Registrar",
+      "category": "Student services",
+      "aliases": ["enrollment", "records", "registration", "transcript"],
+      "description": "Placeholder office for enrollment and student records.",
+      "steps": [
+        "From the fictional GuideBot kiosk, take the sample corridor to your right.",
+        "Continue past the placeholder notice board.",
+        "Stop at the fictional Registrar counter marked Student Records."
+      ]
+    },
+    {
+      "id": "computer-laboratory",
+      "name": "Computer Laboratory",
+      "category": "Learning",
+      "aliases": ["computer lab", "computers", "ict", "programming"],
+      "description": "Placeholder room for computer classes and practical activities.",
+      "steps": [
+        "From the fictional GuideBot kiosk, follow the sample main corridor straight ahead.",
+        "Turn right at the placeholder sign marked Technology Wing.",
+        "Continue to the second fictional doorway marked Computer Laboratory."
+      ]
+    },
+    {
+      "id": "guidance-office",
+      "name": "Guidance Office",
+      "category": "Student services",
+      "aliases": ["counseling", "counselling", "counselor", "student support"],
+      "description": "Placeholder office for student guidance and support.",
+      "steps": [
+        "From the fictional GuideBot kiosk, take the sample corridor to your left.",
+        "Continue toward the placeholder sign marked Student Support.",
+        "Stop at the fictional Guidance Office door at the end of the corridor."
+      ]
+    }
+  ]
+}

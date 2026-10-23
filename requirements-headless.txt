@@ -1,0 +1,2 @@
+# Orange Pi terminal/monitor mode: standard library only; no Tkinter needed.
+-r requirements.txt

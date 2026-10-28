@@ -1,5 +1,33 @@
 # Project review and validation results
 
+## October 29, 2026: TFT/touch bench tools and design notes
+
+On the Windows laptop, Python 3.14.6 ran:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m unittest discover -s tools -p test_tft_touch_calibrate.py -v
+```
+
+The main suite passed all 64 tests, including 11 GUI tests, with no failures or
+skips. The separate calibration suite passed six tests covering reversed axes,
+rotation/skew, small ADC noise, unusable samples, and the saved calibration's
+numerical consistency. Hardware modules are imported only when the diagnostic
+runs, so these software checks require no GPIO hardware or Linux dependencies.
+
+Physical evidence from the user's Orange Pi bench session: the screen displayed
+the color sequence, touch readings changed with position and detected release,
+and the displayed-target calibration produced the checked-in
+`tools/tft_touch_calibration.json`. Independently recalculating that JSON gives
+RMS fit error 5.949 pixels, maximum fit error 7.244 pixels, and independent
+verification errors 5.635, 10.472, and 13.150 pixels. These passed the tool's
+thresholds. This is a record of the user's physical test and the JSON review,
+not a claim that Windows automated tests exercised the physical devices.
+
+The main application still uses simulated hardware. The face/voice design is
+documented, not implemented; speech, ultrasonic integration, and servo movement
+remain pending. The older review below is retained as historical context.
+
 Date: October 23, 2026.
 
 Environment: Windows laptop. The main interpreter is Python 3.14.6 with Tcl/Tk 8.6.15. An isolated Python 3.13.16 runtime was also downloaded into the Git-ignored `.tools/python` directory for actual compatibility testing. The default laptop Python was not changed. This review did not access the Orange Pi.

@@ -2,7 +2,7 @@
 
 A Python campus information assistant with a Tkinter simulator for Windows and a lightweight terminal mode for an Orange Pi One running Armbian. Both modes use simulated hardware. There is no option to enable real motors.
 
-Development happens on the Windows laptop with Python 3.14. Code transfer will use **laptop → GitHub → Orange Pi**, with the board independently cloning or pulling through Ethernet. This does not require laptop-to-board SSH or a USB drive. The application itself runs offline after transfer. No repository has been published or pushed by this review.
+Development happens on the Windows laptop with Python 3.14. Project updates can use **laptop → GitHub → Orange Pi**, with the board independently cloning or pulling through Ethernet. Direct SSH/SCP is also used for physical bench testing. The application itself runs offline after transfer.
 
 The included Library, Registrar, Computer Laboratory, and Guidance Office routes are **fictional placeholders**. They must not be used to navigate a real campus.
 
@@ -215,12 +215,24 @@ Missing nodes do not prove the board lacks an interface, and visible nodes do no
 
 ## 8. GitHub publishing and code transfer
 
-Follow [the step-by-step GitHub guide](docs/GITHUB.md). A local `main` repository has been initialized for ignore-rule checks. Nothing has been staged, committed, given a remote, or pushed during this review. Create the GitHub repository and push only when you decide to publish.
+The project repository is [Ampexqt/guidebot](https://github.com/Ampexqt/guidebot). Follow [the step-by-step GitHub guide](docs/GITHUB.md) for the code-transfer workflow. After reviewing local changes, commit and push the project sources; the Orange Pi can independently pull updates.
 
 `.gitignore` excludes virtual environments, the downloaded test interpreter, bytecode, logs, local editor files, `.env` files, common private-key formats, and common credentials filenames. Both devices create their own environment if needed; do not transfer `.venv` between Windows and Linux.
 
-## 9. Future hardware stage
+## 9. Physical TFT and touch bench test
 
-See `docs/ARCHITECTURE.md`. The controller already accepts servo and sensor interfaces, and the project defines a display-frame interface. Actual PCA9685, ultrasonic, SPI display, and touchscreen drivers are **not implemented or tested**. The supplied future-driver constructors deliberately raise an error; none is imported by the simulator. The current desktop app always creates simulated devices.
+The standalone [TFT/touch calibration tool](tools/TFT_TOUCH_TEST.md) was exercised on the robot's Orange Pi One and 240x320 SPI screen. It displays calibration targets, reads the separate touch connections, verifies the mapping, and saves calibration JSON. It uses Linux SPI/GPIO and has additional Debian dependencies; it is separate from the simulator.
 
-No Raspberry Pi GPIO library, real motor command, I2C bus operation, SPI transfer, or ultrasonic pin access is used in Phase 1.
+Run its software checks on Windows or Linux without connected hardware:
+
+```sh
+python -m unittest discover -s tools -p test_tft_touch_calibrate.py -v
+```
+
+The saved [bench calibration](tools/tft_touch_calibration.json) belongs to the tested screen and orientation. Recalibrate after changing the display orientation, touch wiring, or unit. The main GuideBot app does not yet load this calibration or drive the physical TFT.
+
+## 10. Face, voice, and future hardware integration
+
+The agreed [face and voice design](docs/FACE_AND_VOICE_DESIGN.md) uses an animated face and talking mouth, a destination menu, and **Repeat** and **Menu** touch buttons, with no subtitles. Speech hardware still needs identification; this design is pending implementation.
+
+See [the architecture plan](docs/ARCHITECTURE.md) for the app interfaces. PCA9685/servo and ultrasonic app adapters remain unimplemented, and servo movement testing awaits suitable power. The future-driver constructors still deliberately raise an error. The desktop and headless app modes use simulated devices; the standalone TFT diagnostic is the physical bench-test entry point.

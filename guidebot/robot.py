@@ -177,6 +177,8 @@ def main(argv=None):
     parser.add_argument('--database', type=Path, default=DEFAULT_DATABASE)
     parser.add_argument('--calibration', type=Path, default=CALIBRATION)
     parser.add_argument('--audio-device', default='plughw:CARD=CD002AUDIO,DEV=0')
+    parser.add_argument('--speech-amplitude', type=int, choices=range(201), default=100,
+                        metavar='0-200', help='eSpeak amplitude: default 100; maximum 200.')
     parser.add_argument('--bench-motion', action='store_true',
                         help='Enable tested 1400-1600 us pulses on UNATTACHED servos only.')
     parser.add_argument('--check', action='store_true', help='Validate data and calibration without opening hardware.')
@@ -190,7 +192,7 @@ def main(argv=None):
             return 0
         from .robot_devices import Speech, ServoDevice, RangeSensor
         if args.preview:
-            session = RobotSession(database, Speech(args.audio_device))
+            session = RobotSession(database, Speech(args.audio_device, args.speech_amplitude))
             render(session, 1)[0].save(args.preview)
             return 0
         from PIL import ImageChops
@@ -199,7 +201,7 @@ def main(argv=None):
         with ExitStack() as stack:
             old_handler = signal.signal(signal.SIGTERM, stop_signal)
             stack.callback(signal.signal, signal.SIGTERM, old_handler)
-            speech = Speech(args.audio_device)
+            speech = Speech(args.audio_device, args.speech_amplitude)
             stack.callback(speech.close)
             motion = ServoDevice() if args.bench_motion else None
             if motion:

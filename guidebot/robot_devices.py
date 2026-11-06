@@ -8,8 +8,11 @@ from tools.servo_sequence_test import PCA9685, PULSES_US
 
 
 class Speech:
-    def __init__(self, device):
+    def __init__(self, device, amplitude=100):
+        if type(amplitude) is not int or not 0 <= amplitude <= 200:
+            raise ValueError('Speech amplitude must be an integer from 0 to 200.')
         self.device = device
+        self.amplitude = amplitude
         self.children = []
 
     @property
@@ -28,6 +31,7 @@ class Speech:
         self.close()
         # No shell: route generated WAV data directly to the named USB device.
         source = subprocess.Popen(['espeak-ng', '-v', 'en-us', '-s', '140',
+                                   '-a', str(self.amplitude),
                                    '--stdout', text], stdout=subprocess.PIPE)
         self.children = [source]
         try:

@@ -53,6 +53,26 @@ sudo python3 -m guidebot.robot --bench-motion
 
 No extra Orange Pi wiring changes are required for the documented working pin map. This entry point uses SPI0.0, GPIO chip0 with the H3 label, I2C0/address0x40, the checked-in touch calibration, and the existing separate touch GPIO lines. Keep the HC-SR04 Echo voltage divider fitted.
 
+## Speech volume
+
+Two independent controls affect loudness. In the Orange Pi terminal, stop the
+robot and run `alsamixer -c CD002AUDIO`. Select each playback volume with the
+left/right arrow keys, raise it with Up (100% is maximum), and press M only if
+it shows MM (muted). Press Esc to exit. Save the mixer with
+`sudo alsactl store CD002AUDIO`. Some USB devices expose no mixer controls;
+if so, retain the error/output for diagnosis rather than assuming volume changed.
+
+The runtime keeps the normal eSpeak amplitude of 100 by default. After pulling
+the volume-option update, request eSpeak's maximum with:
+
+```bash
+sudo python3 -m guidebot.robot --speech-amplitude 200
+```
+
+Add `--bench-motion` if testing unattached motors too. A value of 200 increases
+the generated speech amplitude; it does not change the USB mixer or guarantee
+twice the perceived volume. If speech becomes distorted, lower the amplitude.
+
 ## Later updates
 
 Push laptop changes first. Stop the robot with Ctrl+C before pulling on the Pi:

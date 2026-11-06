@@ -132,3 +132,18 @@ Automated GUI tests verify widget behavior and layout bounds, rather than pixel-
 Armbian execution, Linux permissions on the actual board, ARM-specific behavior, memory consumption within 512 MB, sustained CPU load, and real I2C/SPI availability remain untested. The documented clone/pull commands have not been executed against GitHub because publication awaits the user's decision. Tests using Linux-shaped fixture directories do not establish hardware availability.
 
 No Orange Pi connection, PCA9685 output, servo motion, HC-SR04 measurement, SPI LCD rendering, or physical touchscreen behavior has been tested. Future real drivers are disabled and are not implemented. The preview is a Tkinter simulation, and all campus directions are fictional placeholders.
+
+# November 6 integrated hardware frontend update
+
+The original review above remains a historical simulator baseline. The new
+`guidebot.robot` entry point was validated on Windows: the original 64
+application checks and 14 new runtime checks passed (78 total), plus 26
+standalone calibration/servo/ultrasonic checks. New coverage includes arrival
+hysteresis/dropouts, menu/Repeat/speech behavior, serial motor timing, stale
+sensor readings, child-process failures and cleanup after partial startup.
+Four TFT layouts were rendered with bundled Pillow 13, visually inspected and
+checked at each enabled button center. CLI help, calibration/data validation
+and diff whitespace checks passed. These checks do not prove simultaneous
+hardware operation: the user reports individual component tests passed, and
+the combined Orange Pi acceptance check in [ROBOT_RUNTIME.md](ROBOT_RUNTIME.md)
+is still required. No mounted motion calibration or real campus routes exist yet.

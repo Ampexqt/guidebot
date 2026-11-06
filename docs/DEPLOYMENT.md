@@ -1,5 +1,7 @@
 # Orange Pi One deployment — terminal simulation only
 
+For the new **physical robot** entry point, dependencies, GitHub clone/pull commands and combined acceptance checks, use [ROBOT_RUNTIME.md](ROBOT_RUNTIME.md). This older page describes only `python -m guidebot --headless`, which remains a simulation. Its historical hardware status and test counts below predate the integrated program.
+
 The intended transfer is Windows laptop → GitHub over HTTPS → Orange Pi over its own Ethernet connection. Commands below run locally on the named device; none requires laptop-to-board SSH. GitHub publication and real Orange Pi execution have not been performed by this review.
 
 ## 1. Publish from Windows when ready

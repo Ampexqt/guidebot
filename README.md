@@ -1,6 +1,8 @@
-# GuideBot — Windows simulator and headless terminal
+# GuideBot — campus assistant and Orange Pi robot
 
-A Python campus information assistant with a Tkinter simulator for Windows and a lightweight terminal mode for an Orange Pi One running Armbian. Both modes use simulated hardware. There is no option to enable real motors.
+A Python campus information assistant with a Windows Tkinter simulator, a terminal simulation, and a separate integrated Orange Pi hardware program. The existing simulator modes keep using simulated hardware.
+
+**Physical robot:** see [setup and GitHub deployment](docs/ROBOT_RUNTIME.md) for `python3 -m guidebot.robot`. It combines the tested TFT/touch screen, USB speech, HC-SR04 visitor detection, and optional unloaded PCA9685 servo motions. The four motors are two hands and two feet, with no head or neck. Individual component tests have passed according to the user; combined operation on the Pi remains to be verified.
 
 Development happens on the Windows laptop with Python 3.14. Project updates can use **laptop → GitHub → Orange Pi**, with the board independently cloning or pulling through Ethernet. Direct SSH/SCP is also used for physical bench testing. The application itself runs offline after transfer.
 
@@ -8,7 +10,7 @@ The included Library, Registrar, Computer Laboratory, and Guidance Office routes
 
 ## 1. Start on Windows
 
-Python 3.13 and 3.14 are supported targets. The desktop simulator also needs Tcl/Tk. The application uses only the Python standard library. The current review ran the complete test suite on **Python 3.14.6 and Python 3.13.16 on Windows**; this is not a test of Armbian, ARM, or physical devices. See [test results](docs/TEST_RESULTS.md).
+Python 3.13 and 3.14 are supported targets. The desktop simulator also needs Tcl/Tk and otherwise uses only the Python standard library. The physical frontend needs the Debian packages listed in [the runtime guide](docs/ROBOT_RUNTIME.md). The compatibility review ran on **Python 3.14.6 and Python 3.13.16 on Windows**; this is not a test of Armbian, ARM, or physical devices. See [test results](docs/TEST_RESULTS.md).
 
 Open your IDE terminal as PowerShell and run:
 
@@ -229,10 +231,10 @@ Run its software checks on Windows or Linux without connected hardware:
 python -m unittest discover -s tools -p test_tft_touch_calibrate.py -v
 ```
 
-The saved [bench calibration](tools/tft_touch_calibration.json) belongs to the tested screen and orientation. Recalibrate after changing the display orientation, touch wiring, or unit. The main GuideBot app does not yet load this calibration or drive the physical TFT.
+The saved [bench calibration](tools/tft_touch_calibration.json) belongs to the tested screen and orientation. Recalibrate after changing the display orientation, touch wiring, or unit. The physical `guidebot.robot` frontend loads this mapping; the desktop simulator does not access the TFT.
 
-## 10. Face, voice, and future hardware integration
+## 10. Integrated physical robot
 
-The agreed [face and voice design](docs/FACE_AND_VOICE_DESIGN.md) uses an animated face and talking mouth, a destination menu, and **Repeat** and **Menu** touch buttons, with no subtitles. Speech hardware still needs identification; this design is pending implementation.
+The [physical runtime](docs/ROBOT_RUNTIME.md) implements an animated face and talking mouth, destination menu, **Repeat** and **Menu** buttons without subtitles, USB speech, and ultrasonic visitor greetings. Add `--bench-motion` only for the current unattached servos to enable small serialized movements and individual motor buttons.
 
-See [the architecture plan](docs/ARCHITECTURE.md) for the app interfaces. PCA9685/servo and ultrasonic app adapters remain unimplemented, and servo movement testing awaits suitable power. The future-driver constructors still deliberately raise an error. The desktop and headless app modes use simulated devices; the standalone TFT diagnostic is the physical bench-test entry point.
+The legacy future-driver placeholders still deliberately raise errors; the new physical entry point uses separate real adapters. The desktop and headless simulation stay unchanged. Follow the runtime guide for GitHub clone/pull deployment and the combined hardware acceptance check. Mounted limb calibration and verified real campus routes remain outstanding.

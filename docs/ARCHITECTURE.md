@@ -1,5 +1,15 @@
 # GuideBot architecture and later integration
 
+November 6 implementation: `guidebot.robot` now provides a separate physical frontend. `RobotSession` handles face/menu/Repeat and arrival policy; `robot_devices` manages asynchronous USB speech, a worker-owned HC-SR04 GPIO request, and timed bench motions. Display/touch and PCA primitives reuse the successful standalone tools. This leaves the legacy simulator controller and its head/arm labels unchanged. See [runtime guide](ROBOT_RUNTIME.md); the Phase 1 description below is historical. Combined hardware execution remains unverified.
+
+November 4 physical-layout clarification: the user has **two hands and two
+feet, with no motorized head or neck**. The simulator joint names and behavior
+described below remain the existing software implementation, not the corrected
+physical mapping. See [project notes](PROJECT_NOTES.md) and the
+[combined wiring guide](COMBINED_WIRING.md) before implementing real limb drivers.
+The TFT/touch bench tests have also progressed beyond the original Phase 1
+status below; their results are recorded in [test results](TEST_RESULTS.md).
+
 Phase 1 has a Windows graphical simulator and a terminal/JSON frontend suitable for headless deployment. Both use simulated devices. The Orange Pi, PCA9685 HW-570, four servos, HC-SR04, SPI TFT, and touchscreen have not been accessed or tested.
 
 ## Current data flow

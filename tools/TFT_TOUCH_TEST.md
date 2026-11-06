@@ -4,6 +4,11 @@ Standalone bench diagnostic for the wiring tested in this chat. It does not
 change the GuideBot app or drive a motor. It assumes a 240x320 ILI9341-compatible
 display and an XPT2046/ADS7846-compatible resistive touch interface.
 
+For simultaneous LCD, PCA9685, and proposed HC-SR04 connections, follow the
+[combined wiring guide](../docs/COMBINED_WIRING.md). It replaces the direct LCD
+LED-to-pin-1 connection below with a shared 3.3 V breadboard node; all tested
+LCD/touch signal pins stay the same.
+
 Turn off and unplug the board before changing wires. Header numbers below are
 physical positions, not GPIO offsets. Find the board's pin-1 marking first.
 

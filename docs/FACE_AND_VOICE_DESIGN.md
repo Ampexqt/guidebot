@@ -2,9 +2,13 @@
 
 Recorded: October 29, 2026
 
-Status: design agreed in conversation; implementation is pending. This document
-records the intended behavior, rather than claiming that the current app already
-supports physical speech or the revised screen interface.
+Physical limb layout corrected: November 4, 2026.
+
+Status updated November 6: the separate `guidebot.robot` entry point implements
+the face, blink, playback-driven mouth, destination menu, Repeat and Menu flow.
+It includes ultrasonic greetings and optional unloaded motor motions. Combined
+execution on the Orange Pi is still pending; see [runtime guide](ROBOT_RUNTIME.md).
+Expression variations and mounted limb calibration remain future work.
 
 ## Purpose
 
@@ -75,7 +79,12 @@ playing, with blinking and expressions appropriate to waiting, welcoming, and
 explaining. More closely following audio loudness is a possible later
 improvement, not a requirement for the first version.
 
-The four planned servos remain intended for head and arm gestures.
+The user clarified that the four physical servos are for **two hands and two
+feet**, with **no motorized head or neck**. The face and mouth are screen
+animations. Proposed PCA9685 channels are 0 left hand, 1 right hand, 2 left foot,
+and 3 right foot, pending identification and calibration of the actual joints.
+This supersedes the earlier head/arm assumption. Existing simulator joint names
+have not yet been revised to match this mechanism.
 
 ## Equipment and current progress
 
@@ -85,22 +94,19 @@ The four planned servos remain intended for head and arm gestures.
 | 2.4-inch SPI TFT touchscreen | Face and destination menu; color and touch tests passed |
 | Touch calibration | Saved in `tools/tft_touch_calibration.json`; RMS fit error about 5.95 pixels; three verification errors about 5.64, 10.47, and 13.15 pixels |
 | PCA9685 | Servo controller; I2C communication previously detected at address 0x40 |
-| Four SG90 servos | Planned gestures; movement testing pending suitable servo power |
-| Ultrasonic sensor | Planned visitor detection; component testing pending |
-| Speaker / audio interface | Required for spoken information; actual available audio equipment still needs identification |
+| Four SG90 servos | User reports component tests passed, still unattached; channel identification and mounted mechanical limits need calibration |
+| Ultrasonic sensor | HC-SR04 with two 10 kOhm divider resistors; user reports test passed; integrated visitor detection implemented |
+| Speaker / audio interface | USB CD002AUDIO detected and heard; integrated eSpeak/ALSA playback implemented |
 
-Calibration passed the bench test's limits, but the saved mapping is not yet
-integrated into GuideBot. Use generous touch targets and verify the final
-interface physically before relying on small controls.
+Calibration passed the bench test's limits and is loaded by `guidebot.robot`.
+The interface uses generous touch targets; verify them physically in the combined test.
 
-## Before implementation
+## Next verification
 
-Identify the actual speaker, its connection, and any amplifier or audio
-interface required. Then implement the face and menu views, load the saved
-touch calibration, add speech playback and Repeat, and connect mouth animation
-to playback start and completion. Test these together before adding gestures
-or automatic visitor greetings.
+Run the combined acceptance checklist in [ROBOT_RUNTIME.md](ROBOT_RUNTIME.md).
+Verify face/touch/audio together first, then enable unloaded bench motion.
+Calibrate the four limbs after mounting before adding physical gestures.
 
 This plan does not change the robot's campus-assistant purpose or authorize
-unverified campus routes. It records the requested interface revision for
-future work.
+unverified campus routes. It records the requested interface revision and
+the implementation limits above.

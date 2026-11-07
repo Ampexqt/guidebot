@@ -235,6 +235,11 @@ The saved [bench calibration](tools/tft_touch_calibration.json) belongs to the t
 
 ## 10. Integrated physical robot
 
+To start GuideBot automatically when the Orange Pi powers on, use the
+[boot service setup](docs/ROBOT_RUNTIME.md#start-automatically-when-powered-on).
+It runs the face, touch menu, speech and visitor sensor without logging in;
+servo motion stays disabled.
+
 The [physical runtime](docs/ROBOT_RUNTIME.md) implements an animated face and talking mouth, destination menu, **Repeat** and **Menu** buttons without subtitles, USB speech, and ultrasonic visitor greetings. Add `--bench-motion` only for the current unattached servos to enable small serialized movements and individual motor buttons.
 
 The legacy future-driver placeholders still deliberately raise errors; the new physical entry point uses separate real adapters. The desktop and headless simulation stay unchanged. Follow the runtime guide for GitHub clone/pull deployment and the combined hardware acceptance check. Mounted limb calibration and verified real campus routes remain outstanding.

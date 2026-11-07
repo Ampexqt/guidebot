@@ -73,9 +73,86 @@ Add `--bench-motion` if testing unattached motors too. A value of 200 increases
 the generated speech amplitude; it does not change the USB mixer or guarantee
 twice the perceived volume. If speech becomes distorted, lower the amplitude.
 
+## Start automatically when powered on
+
+After the face, touch and speech work in a manual run, install the boot service.
+Push the new `tools/install_robot_service.py`, its test and this guide from the
+laptop first; pulling on the Pi cannot download unpushed laptop changes.
+
+Stop a manually running GuideBot with **Ctrl+C**. In the **Orange Pi terminal**:
+
+```bash
+cd ~/guidebot
+git pull --ff-only
+sudo python3 -m tools.install_robot_service --speech-amplitude 200
+sudo systemctl status guidebot --no-pager
+```
+
+This installs `/etc/systemd/system/guidebot.service`, enables it for future boots,
+and starts it now. The installer uses the checkout's actual path, so keep that
+folder in place. It runs the system Python as root, matching the working manual
+hardware command. It starts after the boot device trigger and audio restoration
+services, retries failed runs after 10 seconds, and sends logs to the journal.
+The boot service does not require login, an SSH session, a Linux desktop or
+internet access. It leaves servo motion disabled; the existing bench movements
+are not calibrated mounted gestures. The USB speaker must remain connected.
+
+Amplitude 200 requests the same maximum speech amplitude described above. To
+reduce distortion, rerun the installer with `--speech-amplitude 150` or `100`.
+An alternative USB card can be selected with `--audio-device`; rerunning the
+installer replaces the service options and restarts it. It does not alter saved
+ALSA mixer levels. Keep custom service changes in `sudo systemctl edit guidebot`.
+
+Confirm the face appears and speech works, then test a real boot:
+
+```bash
+sudo reboot
+```
+
+SSH disconnects during reboot. The face should return after the Pi boots without
+typing a start command. Reconnect only to inspect problems:
+
+```bash
+sudo systemctl status guidebot --no-pager
+sudo journalctl -u guidebot -b -n 60 --no-pager
+```
+
+`active (running)` means the process is running; also verify the physical screen,
+touch and speech. An `activating (auto-restart)` or `failed` state needs the logs.
+The installer cannot prove successful hardware startup just from systemctl.
+
+To stop it for a manual test, use `sudo systemctl stop guidebot` first so two
+programs do not compete for GPIO/audio. Resume with `sudo systemctl start guidebot`.
+To turn off boot startup and stop the running service:
+
+```bash
+sudo systemctl disable --now guidebot
+```
+
+Shutdown normally with `sudo poweroff` and wait for the Pi to shut down before
+disconnecting power.
+
+The unit follows the [systemd service documentation](https://www.freedesktop.org/software/systemd/man/249/systemd.service.html).
+Boot behavior still requires physical verification on the Orange Pi.
+
 ## Later updates
 
-Push laptop changes first. Stop the robot with Ctrl+C before pulling on the Pi:
+Push laptop changes first. With boot startup enabled, update in the Pi terminal:
+
+```bash
+sudo systemctl stop guidebot
+cd ~/guidebot
+git status --short
+git pull --ff-only
+python3 -m guidebot.robot --check
+sudo systemctl start guidebot
+```
+
+If pulling or validation fails, resolve it before starting the service. Normal
+Python code updates only need a service restart; rerun the installer when its
+service definition changes (include the desired speech/audio options again).
+
+Without a boot service, stop the robot with Ctrl+C before pulling on the Pi:
 
 ```bash
 cd ~/guidebot
@@ -85,7 +162,7 @@ python3 -m guidebot.robot --check
 sudo python3 -m guidebot.robot --bench-motion
 ```
 
-Preserve local edits before pulling; do not use a forced reset. Keep machine-specific calibration or campus data outside the checkout if they should survive updates, for example `~/guidebot-config/`, and select them using `--calibration /home/recursia/guidebot-config/touch.json` and `--database /home/recursia/guidebot-config/campus.json`. Do not commit passwords or copy the Windows `.venv` to Linux. Automatic boot startup is deferred until combined operation passes.
+Preserve local edits before pulling; do not use a forced reset. Keep machine-specific calibration or campus data outside the checkout if they should survive updates, for example `~/guidebot-config/`, and select them using `--calibration /home/recursia/guidebot-config/touch.json` and `--database /home/recursia/guidebot-config/campus.json`. For the boot service, set these arguments in a systemd override with `sudo systemctl edit guidebot` (clear `ExecStart=` before supplying the full replacement command), then reload and restart. Do not commit passwords or copy the Windows `.venv` to Linux.
 
 ## Combined acceptance check
 

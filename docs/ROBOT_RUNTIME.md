@@ -4,7 +4,7 @@ This adds a physical frontend alongside the existing Windows simulator. Run it f
 
 ## Current behavior
 
-- Idle animated face; a visitor closer than 45 cm triggers a spoken welcome. A valid reading of 50 cm or farther re-arms arrival detection, with a 15-second greeting cooldown. Missing readings do not trigger greetings. An orange dot and console message indicate a sensor problem; touch navigation remains usable.
+- Idle animated face; an object closer than 45 cm triggers "Object detected at 30 centimeters" (using the measured distance, rounded to whole centimeters), followed by the spoken welcome. The detection and one-decimal reading are logged to the console/service journal. A valid reading of 50 cm or farther re-arms arrival detection, with a 15-second greeting cooldown. Missing readings do not trigger greetings. An orange dot and console message indicate a sensor problem; touch navigation remains usable.
 - Tap the face to open large destination buttons. Selecting one speaks its route, returns to the face, and animates the mouth during playback. Menu stops playback. Repeat replays the previous message and is disabled during speech. No spoken-text subtitles appear on the face.
 - The menu's Motors button opens four individual motor controls. By default they are disabled. `--bench-motion` enables only the previously tested small pulses: 1500, 1400, 1500, 1600, 1500 microseconds, one second per step, then output off. Only one motor moves at a time. Arrival also requests channel 0; destination selection requests channel 1. Requests during an existing movement are ignored.
 - Channel plan: 0 left hand, 1 right hand, 2 left foot, 3 right foot. These are proposed identities until the motors are mounted. No head or neck motor is assumed. This program does not implement walking or balance.
@@ -73,6 +73,31 @@ Add `--bench-motion` if testing unattached motors too. A value of 200 increases
 the generated speech amplitude; it does not change the USB mixer or guarantee
 twice the perceived volume. If speech becomes distorted, lower the amplitude.
 
+## Hear the ultrasonic detection
+
+On the face screen with no speech playing, hold a flat object about **30 cm**
+in front of the sensor. It should say **"Object detected at 30 centimeters"**
+(the actual sensor reading may differ), then welcome you. Exactly 45 cm does
+not trigger; the valid reading must be **below 45 cm**. The sensor detects an
+echo from an object, not whether it is a person.
+
+Move the object to **50 cm or farther**, wait until at least **15 seconds after
+the previous greeting started**, then bring it below 45 cm again. Keeping an
+object close does not repeat the sound. Menu screens and active speech suppress
+arrival greetings; return to the face and move the object far then near to retry.
+No echo or a stale reading is not counted as a detection.
+
+With boot startup enabled, inspect the detection log using:
+
+```bash
+sudo journalctl -u guidebot -b -n 60 --no-pager
+```
+
+Look for `Ultrasonic: object detected at 30.2 cm (trigger <45 cm).` The spoken
+reading confirms the sensor-to-speech path when heard on the Pi; compare with a
+ruler to check distance accuracy. The sensor service stays offline and uses the
+existing USB speaker.
+
 ## Start automatically when powered on
 
 After the face, touch and speech work in a manual run, install the boot service.
@@ -89,7 +114,9 @@ sudo systemctl status guidebot --no-pager
 ```
 
 This installs `/etc/systemd/system/guidebot.service`, enables it for future boots,
-and starts it now. The installer uses the checkout's actual path, so keep that
+and starts it now. The installer validates the generated unit with
+`systemd-analyze verify` before replacing an existing service. The installer
+uses the checkout's actual path, so keep that
 folder in place. It runs the system Python as root, matching the working manual
 hardware command. It starts after the boot device trigger and audio restoration
 services, retries failed runs after 10 seconds, and sends logs to the journal.
@@ -134,6 +161,22 @@ disconnecting power.
 
 The unit follows the [systemd service documentation](https://www.freedesktop.org/software/systemd/man/249/systemd.service.html).
 Boot behavior still requires physical verification on the Orange Pi.
+
+If an earlier installer produced `Loaded: bad-setting` because it quoted the
+working directory, repair the default checkout's installed unit on the Pi:
+
+```bash
+sudo sed -i 's|^WorkingDirectory=.*|WorkingDirectory=/home/recursia/guidebot|' /etc/systemd/system/guidebot.service
+sudo systemd-analyze verify /etc/systemd/system/guidebot.service
+sudo systemctl daemon-reload
+sudo systemctl restart guidebot
+sudo systemctl status guidebot --no-pager -l
+```
+
+Use the checkout's actual absolute path if it differs. Do not rerun the old
+installer, which would restore the faulty line. Pull the corrected installer
+after it is pushed from the laptop. If verification still reports an error,
+retain its full output for diagnosis before rebooting.
 
 ## Later updates
 

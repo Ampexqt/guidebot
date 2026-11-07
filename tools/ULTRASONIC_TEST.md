@@ -84,7 +84,10 @@ python -m unittest discover -s tools -p test_ultrasonic.py -v
 ```
 
 These checks do not open GPIO devices or verify physical timing/wiring. The
-main GuideBot distance adapter is still simulated.
+physical `guidebot.robot` frontend uses the real sensor adapter. Its
+[audible detection check](../docs/ROBOT_RUNTIME.md#hear-the-ultrasonic-detection)
+speaks the measured distance when an object enters the range below 45 cm.
+Stop `guidebot.service` before running this standalone test; both use the same GPIO lines.
 
 References:
 - [HC-SR04 Echo divider](https://learn.adafruit.com/distance-measurement-ultrasound-hcsr04/connect-the-sensor)

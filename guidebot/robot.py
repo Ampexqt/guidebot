@@ -13,6 +13,9 @@ from .database import CampusDatabase, DEFAULT_DATABASE
 ROOT = Path(__file__).resolve().parent.parent
 CALIBRATION = ROOT / 'tools' / 'tft_touch_calibration.json'
 GREETING = 'Hello. I am Guide Bot, your campus information assistant. Please tap the screen to choose a destination.'
+DETECT_CM = 45
+REARM_CM = 50
+GREETING_COOLDOWN = 15
 
 
 def load_calibration(path):
@@ -55,11 +58,13 @@ class RobotSession:
         if distance is None:
             return
         was_nearby = self.nearby
-        self.nearby = distance < (50 if self.nearby else 45)
+        self.nearby = distance < (REARM_CM if self.nearby else DETECT_CM)
         if (self.nearby and not was_nearby and self.page == 'face'
-                and not self.talking and now - self.last_greeting >= 15):
+                and not self.talking and now - self.last_greeting >= GREETING_COOLDOWN):
             self.last_greeting = now
-            self.say(GREETING)
+            print(f'Ultrasonic: object detected at {distance:.1f} cm '
+                  f'(trigger <{DETECT_CM} cm).', flush=True)
+            self.say(f'Object detected at {distance:.0f} centimeters. ' + GREETING)
             if self.motion:
                 self.motion.start(0)
 
@@ -211,6 +216,8 @@ def main(argv=None):
             stack.callback(sensor.close)
             session = RobotSession(database, speech, motion)
             print('GuideBot running. Tap face for menu. Ctrl+C stops.', flush=True)
+            print(f'Ultrasonic greeting: below {DETECT_CM} cm; re-arm at {REARM_CM} cm '
+                  f'or farther; cooldown {GREETING_COOLDOWN} seconds.', flush=True)
             print('Bench motors enabled.' if motion else 'Motor outputs are not commanded; use --bench-motion for unloaded tests.', flush=True)
             previous = None
             was_pressed = False

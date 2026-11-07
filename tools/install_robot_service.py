@@ -23,6 +23,15 @@ def unit_quote(value, *, command=False):
     return '"' + value + '"'
 
 
+def working_directory_value(root):
+    # Unlike ExecStart arguments, WorkingDirectory is not shell-unquoted.
+    value = str(root)
+    if (not value.startswith('/') or value != value.strip()
+            or any(ord(char) < 32 or ord(char) == 127 for char in value)):
+        raise ValueError('Working directory must be an absolute Linux path without surrounding whitespace or control characters.')
+    return value.replace('%', '%%')
+
+
 def build_unit(root, amplitude=100, audio_device='plughw:CARD=CD002AUDIO,DEV=0'):
     if type(amplitude) is not int or not 0 <= amplitude <= 200:
         raise ValueError('Speech amplitude must be an integer from 0 to 200.')
@@ -34,7 +43,7 @@ StartLimitIntervalSec=0
 [Service]
 Type=exec
 User=root
-WorkingDirectory={unit_quote(root)}
+WorkingDirectory={working_directory_value(root)}
 ExecStart=/usr/bin/python3 -u -m guidebot.robot --speech-amplitude {amplitude} --audio-device {unit_quote(audio_device, command=True)}
 Restart=on-failure
 RestartSec=10
@@ -54,7 +63,7 @@ def install(root, destination, unit):
                    cwd=root, check=True)
     # Replace atomically so an interrupted write cannot leave a partial unit.
     with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', newline='\n',
-                                     dir=destination.parent, delete=False) as output:
+                                     dir=destination.parent, suffix='.service', delete=False) as output:
         temporary = Path(output.name)
         try:
             output.write(unit)
@@ -64,6 +73,8 @@ def install(root, destination, unit):
             temporary.unlink(missing_ok=True)
             raise
     try:
+        # Check with the real systemd parser before replacing/enabling the unit.
+        subprocess.run(['systemd-analyze', 'verify', '--man=no', str(temporary)], check=True)
         temporary.replace(destination)
     finally:
         temporary.unlink(missing_ok=True)

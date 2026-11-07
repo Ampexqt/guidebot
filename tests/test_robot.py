@@ -43,6 +43,39 @@ class RobotTests(unittest.TestCase):
         self.assertIn('Library', text)
         self.motion.start.assert_called_once_with(1)
 
+    def test_detection_speaks_measured_distance_and_logs_trigger(self):
+        with patch('builtins.print') as log:
+            self.session.tick(0, 30.2)
+        message = self.speech.say.call_args.args[0]
+        self.assertTrue(message.startswith('Object detected at 30 centimeters. '))
+        self.assertIn('campus information assistant', message)
+        log.assert_called_once_with(
+            'Ultrasonic: object detected at 30.2 cm (trigger <45 cm).', flush=True)
+        self.assertEqual(self.session.last_message, message)
+
+    def test_exact_trigger_and_rearm_boundaries(self):
+        self.session.tick(0, 45)
+        self.speech.say.assert_not_called()
+        self.session.tick(1, 44.9)
+        self.assertEqual(self.speech.say.call_count, 1)
+        # Holding close, hovering inside the re-arm gap, or missing an echo
+        # must not create a second arrival, even after the cooldown.
+        for stamp, distance in ((16, 30), (17, 49.9), (18, None), (19, 30)):
+            self.session.tick(stamp, distance)
+        self.assertEqual(self.speech.say.call_count, 1)
+        self.session.tick(20, 50)
+        self.session.tick(21, 44.9)
+        self.assertEqual(self.speech.say.call_count, 2)
+
+    def test_arrival_does_not_repeat_until_full_cooldown(self):
+        self.session.tick(0, 30)
+        self.session.tick(1, 50)
+        self.session.tick(14.9, 30)
+        self.assertEqual(self.speech.say.call_count, 1)
+        self.session.tick(14.95, 50)
+        self.session.tick(15, 30)
+        self.assertEqual(self.speech.say.call_count, 2)
+
     def test_repeat_disabled_during_playback_then_replays_same_text(self):
         self.session.action('repeat')
         self.speech.say.assert_not_called()
